@@ -1,0 +1,205 @@
+<h2>ExecutorService</h2>
+<div class="step-text">
+<p>The main purpose of using multithreading is concurrent execution and multi-user support. In the case of multi-core processors, we even have parallel execution of tasks. Another advantage of multithreading is that thread creation consumes fewer resources than process creation.</p>
+<p>The concurrent package for managing threads includes a facility called <strong>executor services</strong>. Executor services simplify the asynchronous execution of tasks and automatically provide a pool of threads and an interface for assigning tasks to them. They facilitate task execution by ensuring we do not have to deal with the <code class="language-java">Thread</code> class. Tasks are represented as <code class="language-java">Runnable </code>or <code class="language-java">Callable</code><strong> </strong>objects. You can execute both types of tasks in a single thread or thread pools with the help of an <code class="language-java">ExecutorService</code>.</p>
+<p style="text-align: center;"><img alt="ExecutorServise diagram" height="312" src="https://ucarecdn.com/ce6991c0-1f97-4671-8fa3-6d65e5d9b4db/" width="700"/></p>
+<p>First, tasks are submitted to an <code class="language-java">ExecutorService</code>. After submission, they are placed in a queue. Available threads pick up the tasks from the queue and execute them.</p>
+<p>When you start tasks using an <code class="language-java">Executor</code> of the <code class="language-java">java.util.concurrent</code> package, it is not necessary to resort to the low-level threading functionality of the <code class="language-java">Thread</code> class. It's enough to create an object of <code class="language-java">ExecutorService</code> type with the required properties and pass a task of <code class="language-java">Callable</code> type to it for execution.</p>
+<h5 id="initialization-of-an-executorservice">Initialization of an ExecutorService</h5>
+<p>As <code class="language-java">ExecutorService</code> is an interface, any of its implementations can be used. There are several implementations to choose from in the <code class="language-java">java.util.concurrent</code> package or you can create your own. The main task is to execute tasks in several threads.</p>
+<p>A thread pool with a fixed number of threads can be obtained by calling the static <code class="language-java">newFixedThreadPool()</code> method of the <code class="language-java">Executors</code> class:</p>
+<pre><code class="language-java">ExecutorService service = Executors.newFixedThreadPool(2);</code></pre>
+<p>Here, only two threads will be active to process tasks. If more than two tasks are submitted, they are held in a queue until threads become available. All threads exist until the pool is closed.</p>
+<p>A pool of cached threads can be obtained by calling the static <code class="language-java">newCachedThreadPool()</code> method of the <code class="language-java">Executors</code> class:</p>
+<pre><code class="language-java">ExecutorService executor = Executors.newCachedThreadPool();</code></pre>
+<p>The <code class="language-java">newCachedThreadPool()</code> method creates a caching thread pool that creates threads as needed but reuses idle threads and cleans up threads that have been idle for a while. A cached thread executor is suitable for applications that run many short tasks.</p>
+<p> </p>
+<p></p><div class="alert alert-primary">
+<p>The <code class="language-java">newCachedThreadPool()</code> method creates threads automatically, and there is no limit on their number. This can lead to unlimited thread growth. Additionally, creating and deleting threads consumes resources. So, despite the seeming convenience, it must be used carefully.</p>
+<p></p></div>
+<p> </p>
+<p>Sometimes you need to execute code after some time. In such cases, the <code class="language-java">ScheduledExecutorService</code> class comes to the rescue. It allows you to set the code to be executed in one or more threads and configure the delay of execution. The delay can be the time between two successive runs or between the end of one run and the start of another. The methods of a <code class="language-java">ScheduledExecutorService</code> return a <code class="language-java">ScheduledFuture</code> object that also contains a deferral value for executing <code class="language-java">ScheduledFuture</code>.</p>
+<pre><code class="language-java">ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
+service.schedule(() -&gt; System.out.println("Executed"), 5, TimeUnit.SECONDS);</code></pre>
+<p>If you want to execute tasks with a <strong>zero initial delay</strong> and <strong>every second</strong> regardless of the completion time of the previous tasks, do this:</p>
+<pre><code class="language-java">ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
+service.scheduleAtFixedRate(() -&gt; System.out.println(
+        "Executed every second"), 0, 1, TimeUnit.SECONDS);</code></pre>
+<p>Finally, if you want to schedule code execution with <strong>zero initial delays</strong> and<strong> one-second intervals</strong> between executions, do the following. Each task will start after the completion of the previous task:</p>
+<pre><code class="language-java">ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
+service.scheduleWithFixedDelay(() -&gt; System.out.println(
+        "Executed after a one-second interval"), 0, 1, TimeUnit.SECONDS);</code></pre>
+<p>The standard thread naming scheme is <strong>pool-N-thread-M</strong>, where N is the pool's serial number (every time you create a new pool, the global counter N is incremented), and M is the thread's serial number in the pool. The <code class="language-java">ThreadFactory</code> class can help to create threads with a specific name.</p>
+<pre><code class="language-java">public class ThreadFactorySimple {
+    public static void main(String[] args) {
+        ThreadFactory threadFactory = new ThreadFactory() {
+            private int counter = 0;
+
+            @Override
+            public Thread newThread(Runnable runnable) {
+                return new Thread(runnable, "thread-pool-name " + counter++);
+                // thread-pool-name 1
+                // thread-pool-name 2
+                // etc.
+            }
+        };
+
+        for (int i = 0; i &lt; 3; i++) {
+            System.out.println(threadFactory.newThread(ThreadFactorySimple::run).getName());
+        }
+    }
+
+    private static void run() {
+        // Some logic
+    }
+}</code></pre>
+<p>With the Google package <code class="language-java">com.google.common.util.concurrent.ThreadFactoryBuilder,</code> you can set the thread name more simply:</p>
+<pre><code class="language-java">public class ThreadFactorySimple {
+    public static void main(String[] args) {
+        ThreadFactory threadFactory = new ThreadFactory() {
+            private final AtomicInteger counter = new AtomicInteger(0);
+
+            @Override
+            public Thread newThread(Runnable runnable) {
+                // Create a new thread with a name, e.g., thread-pool-name-1
+                return new Thread(
+                    runnable, "thread-pool-name-" + counter.getAndIncrement());
+            }
+        };
+
+        ExecutorService service = Executors.newFixedThreadPool(3, threadFactory);
+        for (int i = 0; i &lt; 3; i++) {
+            service.submit(
+                    () -&gt; System.out.println(
+                         Thread.currentThread().getName() + " is running"));
+        }
+        service.shutdown();
+    }
+}</code></pre>
+<p>To use this library, you have to include it in your project. This is an example for Gradle:</p>
+<pre><code class="language-java">// https://mvnrepository.com/artifact/com.google.guava/guava
+implementation group: 'com.google.guava', name: 'guava', version: '31.1-jre'</code></pre>
+<h5 id="variations-of-executorservices-submit-and-invoke-methods">Variations of ExecutorService's submit and invoke methods</h5>
+<p>We can assign tasks to an <code class="language-java">ExecutorService</code><em> </em>using several methods, including <code class="language-java">execute()</code>, which is inherited from the <code class="language-java">Executor</code> interface, and <code class="language-java">submit()</code>, <code class="language-java">invokeAny()</code> and <code class="language-java">invokeAll()</code>.</p>
+<p>The <code class="language-java">execute()</code> method is <strong>void</strong> and doesn't allow getting a task's result or checking a task's status (if it's running or not). It takes a <code class="language-java">Runnable</code> object and executes it asynchronously.</p>
+<pre><code class="language-java">public class RunnableExecuteExample {
+    public static void main(String[] args) {
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        executorService.execute(() -&gt; {
+            System.out.println("Runnable asynchronous task"); // Runnable asynchronous task
+        });
+
+        executorService.shutdown();
+    }
+}</code></pre>
+<p>The <code class="language-java">submit()</code><em> </em>and<em> </em><code class="language-java">invokeAll()</code> methods return an object or a collection of objects of the <code class="language-java">Future</code> type. As such, we can get the result of a task or check its status (if it's running or not).</p>
+<p>The <code class="language-java">submit()</code> method queues a task for execution. It takes an object of <code class="language-java">Callable</code> or <code class="language-java">Runnable</code> type as an input parameter and returns a parameterized object of the <code class="language-java">Future</code> type. Using the <code class="language-java">Future</code> object, you can determine whether a task is finished (using the <code class="language-java">isDone()</code> method) or access its result (using the <code class="language-java">get()</code> method) or an exception if an error occurred during the task execution.</p>
+<pre><code class="language-java">public class RunnableSubmitExample {
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        Future&lt;?&gt; future = executorService.submit(() -&gt; {
+            System.out.println("Runnable task"); // Runnable task
+        });
+
+        System.out.println("Runnable result: " + future.get()); // Runnable result: null
+        // Returns null if the task is finished correctly
+    }
+}</code></pre>
+<p>The <code class="language-java">submit(Callable)</code> method of <code class="language-java">ExecutorService</code> is similar to <code class="language-java">submit(Runnable)</code> but accepts a <code class="language-java">Callable</code> instead of a <code class="language-java">Runnable</code>.</p>
+<pre><code class="language-java">public class SubmitCallableExample {
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        Future&lt;String&gt; future = executorService.submit(() -&gt; {
+            System.out.println("Asynchronous callable");  // Asynchronous callable
+            return "Callable Result";
+        });
+
+        System.out.println("Future: " + future.get());  // Future: Callable Result
+    }
+}</code></pre>
+<p>The <code class="language-java">invokeAny()</code> method accepts a collection of callable objects. Calling this method does not return a <code class="language-java">Future</code> object but returns the result of one of the called objects (if there was a successful execution):</p>
+<pre><code class="language-java">public class InvokeExample {
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        Set&lt;Callable&lt;String&gt;&gt; callables = new HashSet&lt;&gt;();
+        callables.add(() -&gt; "First task");
+        callables.add(() -&gt; "Second task");
+
+        String result = executorService.invokeAny(callables);
+        System.out.println("Result: " + result); // Result:  First task
+
+        executorService.shutdown();
+    }
+}</code></pre>
+<p>The <code class="language-java">invokeAll()</code> method invokes all <code class="language-java">Callable</code> objects passed as parameters. It assigns a collection of tasks to an <code class="language-java">ExecutorService</code>, causing each to run. Results are returned in the form of a list of <code class="language-java">Future</code> objects, which can be used to get the results of the execution of each called object.</p>
+<pre><code class="language-java">public class InvokeAllExample {
+    public static void main(String[] args) throws InterruptedException, ExecutionException {
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        Set&lt;Callable&lt;String&gt;&gt; callables = new HashSet&lt;&gt;();
+        callables.add(() -&gt; "First task");
+        callables.add(() -&gt; "Second task");
+
+        List&lt;Future&lt;String&gt;&gt; futures = executorService.invokeAll(callables);
+        for (Future&lt;String&gt; future : futures) {
+            System.out.println("Future: " + future.get()); // Future: First task
+                                                           // Future: Second task
+        }
+
+        executorService.shutdown();
+    }
+}</code></pre>
+<h5 id="termination-with-the-shutdown-and-shutdownnow-methods">Termination with the shutdown and shutdownNow methods</h5>
+<p>Now let's learn how to finish an <code class="language-java">ExecutorService</code> process.</p>
+<p>In some cases, <code class="language-java">ExecutorService</code>s are very helpful, such as when an app needs to process tasks that appear irregularly or when the number of tasks is not known at compile time. On the other hand, an app could reach its end but not be stopped because a waiting <code class="language-java">ExecutorService</code> will cause the JVM to keep running. To properly shut down an <code class="language-java">ExecutorService</code>, we have the <code class="language-java">shutdown()</code>and <code class="language-java">shutdownNow()</code> APIs.</p>
+<p> </p>
+<p></p><div class="alert alert-primary">
+<p>The <code class="language-java">ExecutorService</code> will not be automatically destroyed when there is no task to process. It will stay alive and wait for new work to appear. You have to stop the <code class="language-java">ExecutorService</code> object because threads in an <code class="language-java">ExecutorService</code> object don't stop themselves.</p>
+<p></p></div>
+<p> </p>
+<p>The <code class="language-java">shutdown()</code> method doesn't cause immediate destruction of the <code class="language-java">ExecutorService</code>. It will make the <code class="language-java">ExecutorService</code> stop accepting new tasks and shut down after all running threads finish their current work:</p>
+<pre><code class="language-java">executorService.shutdown();</code></pre>
+<p>The <code class="language-java">shutdownNow()</code> method tries to destroy the <code class="language-java">ExecutorService</code> immediately and returns a list of tasks that were not taken from the queue. However, this method doesn't guarantee that all the running threads will be stopped at the same time:</p>
+<pre><code class="language-java">executorService.shutDownNow();</code></pre>
+<p>Finally, let's discuss termination with the <code class="language-java">awaitTermination()</code> method. This method blocks the thread calling it until the <code class="language-java">ExecutorService</code> has shut down or a given time-out occurs.</p>
+<p>Here is an example of calling the <code class="language-java">ExecutorService</code> <code class="language-java">awaitTermination()</code> method:</p>
+<pre><code class="language-java">public class AwaitTerminationExample {
+    public static void main(String[] args) {
+        ExecutorService executor = Executors.newFixedThreadPool(3);
+
+        for (int i = 0; i &lt; 3; i++) {
+            executor.execute(() -&gt;
+                    System.out.println("Thread running in: " + Thread.currentThread()));
+            // Thread running in: Thread[pool-1-thread-3,5,main]
+            // Thread running in: Thread[pool-1-thread-2,5,main]
+            // Thread running in: Thread[pool-1-thread-1,5,main]
+        }
+
+        // Prevent new tasks from being submitted
+        executor.shutdown();
+
+        try {
+            // Wait 10 seconds for the tasks to terminate
+            if (!executor.awaitTermination(10, SECONDS)) {
+                // Cancel currently executing tasks
+                executor.shutdownNow();
+                
+                // Wait 60 seconds for tasks to respond
+                if (!executor.awaitTermination(60, SECONDS)) {
+                    System.err.println("Pool did not terminate");
+                }
+            }
+        } catch (InterruptedException ex) {
+            // Cancel if the current thread was interrupted
+            executor.shutdownNow();
+            // Preserve the interrupt status
+            Thread.currentThread().interrupt();
+        }
+
+    }
+}</code></pre>
+<p>The <code class="language-java">awaitTermination()</code> method is typically called after calling <code class="language-java">shutdown()</code> or <code class="language-java">shutdownNow()</code>.</p>
+<h5 id="conclusion">Conclusion</h5>
+<p><code class="language-java">ExecutorService</code>s are an alternative to the <code class="language-java">Thread</code> class for managing threads and help in minimizing complex code.<em> </em>With the help of the <code class="language-java">ExecutorService</code> class, we can manage resources by internally utilizing a thread pool.</p>
+<p>We always have to shut down an executor service after completing tasks and services that are no longer needed. Otherwise, the JVM will never terminate.</p>
+<p>There are many situations in which we have trouble creating an object quickly. Sometimes we have a problem with resources and must fix the number of threads. Thread pool will help us with this.</p>
+</div>

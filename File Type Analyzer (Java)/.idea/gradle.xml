@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GradleMigrationSettings" migrationVersion="1" />
+  <component name="GradleSettings">
+    <option name="linkedExternalProjectsSettings">
+      <GradleProjectSettings>
+        <option name="delegatedBuild" value="false" />
+        <option name="distributionType" value="WRAPPED" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/File Type Analyzer (Java)/task" />
+            <option value="$PROJECT_DIR$/File Type Analyzer (Java)/task/build/classes/java" />
+            <option value="$PROJECT_DIR$/File Type Analyzer (Java)/task/build/generated/sources/annotationProcessor/java" />
+            <option value="$PROJECT_DIR$/File Type Analyzer (Java)/task/build/generated/sources/headers/java" />
+            <option value="$PROJECT_DIR$/File Type Analyzer (Java)/task/build/reports/tests" />
+            <option value="$PROJECT_DIR$/File Type Analyzer (Java)/task/build/test-results" />
+            <option value="$PROJECT_DIR$/File Type Analyzer (Java)/task/build/tmp" />
+            <option value="$PROJECT_DIR$/Topics (1)/Callable and Future/Create a callable" />
+            <option value="$PROJECT_DIR$/Topics (1)/Callable and Future/Execute Callable objects" />
+            <option value="$PROJECT_DIR$/Topics (1)/Callable and Future/Get the result" />
+            <option value="$PROJECT_DIR$/Topics (1)/Callable and Future/How many Callable objects are there" />
+            <option value="$PROJECT_DIR$/Topics (1)/Callable and Future/How many tasks are finished" />
+            <option value="$PROJECT_DIR$/Topics (1)/Callable and Future/Submitting Callable" />
+            <option value="$PROJECT_DIR$/Topics (1)/Callable and Future/Theory" />
+            <option value="$PROJECT_DIR$/Topics (1)/Callable and Future/What is Callable" />
+            <option value="$PROJECT_DIR$/Topics (1)/Callable and Future/What is Future" />
+            <option value="$PROJECT_DIR$/Topics/Floating-point types/Area of a circle" />
+            <option value="$PROJECT_DIR$/Topics/Floating-point types/Celsius to Fahrenheit" />
+            <option value="$PROJECT_DIR$/Topics/Floating-point types/Determine the result" />
+            <option value="$PROJECT_DIR$/Topics/Floating-point types/Distance" />
+            <option value="$PROJECT_DIR$/Topics/Floating-point types/Evaluate an expression" />
+            <option value="$PROJECT_DIR$/Topics/Floating-point types/Existing floating-point types" />
+            <option value="$PROJECT_DIR$/Topics/Floating-point types/Explain the result" />
+            <option value="$PROJECT_DIR$/Topics/Floating-point types/Exponential expression" />
+            <option value="$PROJECT_DIR$/Topics/Floating-point types/Find X" />
+            <option value="$PROJECT_DIR$/Topics/Floating-point types/Theory" />
+            <option value="$PROJECT_DIR$/Topics/Floating-point types/What is the value" />
+            <option value="$PROJECT_DIR$/util" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+    </option>
+  </component>
+</project>
